@@ -12,3 +12,4 @@ name = "2"
 path = "src/2.rs"
 
 [dependencies]
+itertools = "0.12.0"
