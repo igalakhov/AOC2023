@@ -1,9 +1,6 @@
 use aoc2023::{run_problem, Problem};
 use itertools::Itertools;
-use std::{
-    collections::{HashMap, HashSet},
-    fmt::Display,
-};
+use std::fmt::Display;
 
 struct Problem18 {
     short_instructions: Vec<Instruction>,
@@ -25,7 +22,6 @@ enum Dir {
 }
 
 fn parse_line(value: &String) -> (Instruction, Instruction) {
-    println!("{value}");
     let (dir, len, col) = value.split(" ").collect_tuple().unwrap();
 
     (
@@ -34,8 +30,14 @@ fn parse_line(value: &String) -> (Instruction, Instruction) {
             len: len.parse::<isize>().unwrap(),
         },
         Instruction {
-            dir: dir.into(),
-            len: len.parse::<isize>().unwrap(),
+            dir: match col.as_bytes()[col.len() - 2] {
+                b'0' => Dir::Right,
+                b'1' => Dir::Down,
+                b'2' => Dir::Left,
+                b'3' => Dir::Up,
+                _ => panic!(),
+            },
+            len: isize::from_str_radix(&col[2..col.len() - 2], 16).unwrap(),
         },
     )
 }
@@ -53,72 +55,29 @@ impl From<&str> for Dir {
 }
 
 fn get_area(instructions: &Vec<Instruction>) -> isize {
-    let mut lines: HashMap<isize, Vec<(isize, isize)>> = Default::default();
     let (mut i, mut j) = (0, 0);
 
     let mut points = vec![];
 
     for ins in instructions {
         match ins.dir {
-            Dir::Right => {
-                lines.entry(i).or_default().push((j, j + ins.len));
-                j += ins.len;
-            }
-            Dir::Left => {
-                lines.entry(i).or_default().push((j - ins.len, j));
-                j -= ins.len;
-            }
-            Dir::Up => {
-                (i - ins.len + 1..i).for_each(|i| {
-                    lines.entry(i).or_default().push((j, j));
-                });
-
-                i -= ins.len;
-            }
-            Dir::Down => {
-                (i + 1..i + ins.len).for_each(|i| {
-                    lines.entry(i).or_default().push((j, j));
-                });
-                i += ins.len;
-            }
+            Dir::Right => j += ins.len,
+            Dir::Left => j -= ins.len,
+            Dir::Up => i -= ins.len,
+            Dir::Down => i += ins.len,
         }
         points.push((i, j));
     }
 
-    let area = points
+    points
         .iter()
         .tuple_windows()
         .map(|((x1, y1), (x2, y2))| x1 * y2 - y1 * x2)
         .sum::<isize>()
         .abs()
-        / 2;
-
-    let on_perimiter = instructions.iter().map(|ins| ins.len - 1).sum::<isize>();
-
-    let inside = (area + 1) - on_perimiter / 2;
-
-    println!("{area} {on_perimiter} {inside}");
-
-    inside * 2
-
-    // println!("{:?}", lines[&0]);
-    //
-    // lines
-    //     .iter_mut()
-    //     .map(|(i, ints)| {
-    //         ints.sort_by_key(|(l, _)| *l);
-    //
-    //         let ret = ints.iter().map(|(l, r)| r - l + 1).sum::<isize>()
-    //             + ints
-    //                 .iter()
-    //                 .tuples()
-    //                 .map(|((_, r1), (l1, _))| l1 - r1 - 1)
-    //                 .sum::<isize>();
-    //
-    //         println!("{i} {ints:?} {ret}");
-    //         ret
-    //     })
-    //     .sum::<isize>()
+        / 2
+        + instructions.iter().map(|ins| ins.len).sum::<isize>() / 2
+        + 1
 }
 
 impl Problem for Problem18 {
