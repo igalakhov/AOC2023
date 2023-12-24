@@ -1,7 +1,6 @@
 use aoc2023::{run_problem, Problem};
-use itertools::Itertools;
 use std::{
-    collections::{BinaryHeap, HashMap, HashSet, VecDeque},
+    collections::{HashMap, HashSet},
     fmt::Display,
 };
 
@@ -42,36 +41,44 @@ fn fill(
     visited
 }
 
-fn longest_path(
+fn longest_path_brute_force(
     graph: &HashMap<i32, Vec<i32>>,
     areas: &HashMap<i32, usize>,
-    cur: i32,
+    start: i32,
     target: i32,
-    memo: &mut HashMap<i32, Option<(usize, Vec<i32>)>>,
-) -> Option<(usize, Vec<i32>)> {
-    if memo.contains_key(&cur) {
-        return memo[&cur].clone();
+) -> usize {
+    let mut visited = HashSet::new();
+    let mut lens = vec![];
+
+    fn helper(
+        cur: i32,
+        target: i32,
+        graph: &HashMap<i32, Vec<i32>>,
+        visited: &mut HashSet<i32>,
+        lens: &mut Vec<usize>,
+        areas: &HashMap<i32, usize>,
+        mut len: usize,
+    ) -> () {
+        if visited.contains(&cur) {
+            return;
+        }
+        visited.insert(cur);
+
+        len += areas[&cur];
+        if cur == target {
+            lens.push(len);
+        } else {
+            for neighbor in graph.get(&cur).unwrap_or(&vec![]) {
+                helper(*neighbor, target, graph, visited, lens, areas, len);
+            }
+        }
+
+        visited.remove(&cur);
     }
 
-    if cur == target {
-        return Some((areas[&cur], vec![cur]));
-    }
+    helper(start, target, graph, &mut visited, &mut lens, areas, 0);
 
-    let mut ret = graph
-        .get(&cur)
-        .unwrap_or(&vec![])
-        .iter()
-        .filter_map(|neighbor| longest_path(graph, areas, *neighbor, target, memo))
-        .max();
-
-    ret.iter_mut().for_each(|(v, path)| {
-        *v += areas[&cur];
-        path.push(cur);
-    });
-
-    memo.insert(cur, ret.clone());
-
-    ret
+    lens.into_iter().max().unwrap()
 }
 
 impl Problem for Problem23 {
@@ -106,59 +113,77 @@ impl Problem for Problem23 {
             .nth(0)
             .unwrap();
 
-        let mut graph: HashMap<i32, Vec<i32>> = Default::default();
+        let mut graph_loops: HashMap<i32, Vec<i32>> = Default::default();
+        let mut graph_no_loops: HashMap<i32, Vec<i32>> = Default::default();
 
         for i in 0..self.grid.len() {
             for j in 0..self.grid[0].len() {
                 if self.grid[i][j] == '>' {
-                    graph.entry(regions[i][j - 1]).or_default().push(next_name);
-                    graph.entry(next_name).or_default().push(regions[i][j + 1]);
+                    graph_no_loops
+                        .entry(regions[i][j - 1])
+                        .or_default()
+                        .push(next_name);
+                    graph_no_loops
+                        .entry(next_name)
+                        .or_default()
+                        .push(regions[i][j + 1]);
+                    graph_loops
+                        .entry(regions[i][j - 1])
+                        .or_default()
+                        .push(next_name);
+                    graph_loops
+                        .entry(next_name)
+                        .or_default()
+                        .push(regions[i][j - 1]);
+                    graph_loops
+                        .entry(next_name)
+                        .or_default()
+                        .push(regions[i][j + 1]);
+                    graph_loops
+                        .entry(regions[i][j + 1])
+                        .or_default()
+                        .push(next_name);
                     areas.insert(next_name, 1);
                     next_name += 1;
                 }
                 if self.grid[i][j] == 'v' {
-                    graph.entry(regions[i - 1][j]).or_default().push(next_name);
-                    graph.entry(next_name).or_default().push(regions[i + 1][j]);
-                    areas.insert(next_name, 1);
-                    next_name += 1;
-                }
-                if self.grid[i][j] == '<' {
-                    graph.entry(regions[i][j + 1]).or_default().push(next_name);
-                    graph.entry(next_name).or_default().push(regions[i][j - 1]);
-                    areas.insert(next_name, 1);
-                    next_name += 1;
-                }
-                if self.grid[i][j] == '^' {
-                    graph.entry(regions[i + 1][j]).or_default().push(next_name);
-                    graph.entry(next_name).or_default().push(regions[i - 1][j]);
+                    graph_no_loops
+                        .entry(regions[i - 1][j])
+                        .or_default()
+                        .push(next_name);
+                    graph_no_loops
+                        .entry(next_name)
+                        .or_default()
+                        .push(regions[i + 1][j]);
+                    graph_loops
+                        .entry(regions[i - 1][j])
+                        .or_default()
+                        .push(next_name);
+                    graph_loops
+                        .entry(next_name)
+                        .or_default()
+                        .push(regions[i + 1][j]);
+                    graph_loops
+                        .entry(next_name)
+                        .or_default()
+                        .push(regions[i - 1][j]);
+                    graph_loops
+                        .entry(regions[i + 1][j])
+                        .or_default()
+                        .push(next_name);
                     areas.insert(next_name, 1);
                     next_name += 1;
                 }
             }
         }
 
-        let mut memo = HashMap::new();
-
-        if let Some((len, path)) = longest_path(&graph, &areas, 1, target, &mut memo) {
-            // let mut grid_copy = self.grid.clone();
-            // let mut ll = 0;
-            // path.iter().for_each(|p| {
-            //     if let Some(pts) = tiles.get(p) {
-            //         ll += pts.len();
-            //         pts.iter().for_each(|(i, j)| {
-            //             grid_copy[*i][*j] = 'O';
-            //         })
-            //     } else {
-            //         ll += 1;
-            //     }
-            // });
-            //
-            // for i in grid_copy {
-            //     println!("{}", i.iter().collect::<String>());
-            // }
-            // println!("{path:?} {ll}");
-            report_first(&len);
-        }
+        report_first(&longest_path_brute_force(
+            &graph_no_loops,
+            &areas,
+            1,
+            target,
+        ));
+        report_second(&longest_path_brute_force(&graph_loops, &areas, 1, target));
     }
     fn parse(lines: Vec<String>) -> Self {
         Self {
