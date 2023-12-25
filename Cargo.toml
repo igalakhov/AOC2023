@@ -103,6 +103,3 @@ path = "src/24.rs"
 [dependencies]
 itertools = "0.12.0"
 regex = "1.10.2"
-num = "0.4.1"
-geo-types = "0.7.12"
-line_intersection = "0.4"
