@@ -1,5 +1,5 @@
 use aoc2023::{run_problem, Problem};
-use std::{fmt::Display, num};
+use std::fmt::Display;
 
 struct Problem6 {
     races: Vec<(f64, f64)>,

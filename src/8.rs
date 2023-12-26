@@ -1,11 +1,21 @@
 use aoc2023::{run_problem, Problem};
-use num;
 use regex::Regex;
 use std::{collections::HashMap, fmt::Display};
 
 struct Problem8 {
     path: String,
     graph: HashMap<String, (String, String)>,
+}
+
+fn lcm(mut m: i64, mut n: i64) -> i64 {
+    let p = m * n;
+    while m != 0 {
+        if m < n {
+            std::mem::swap(&mut m, &mut n);
+        }
+        m %= n;
+    }
+    p / n
 }
 
 impl Problem for Problem8 {
@@ -50,7 +60,7 @@ impl Problem for Problem8 {
                     steps += 1;
                 }
 
-                part2 = num::integer::lcm(part2, steps);
+                part2 = lcm(part2, steps as i64);
             }
 
             report_second(&part2);
