@@ -99,7 +99,12 @@ path = "src/23.rs"
 name = "24"
 path = "src/24.rs"
 
+[[bin]]
+name = "25"
+path = "src/25.rs"
 
 [dependencies]
 itertools = "0.12.0"
 regex = "1.10.2"
+ring-algorithm = "0.7.0"
+rustworkx-core = "0.13.2"

@@ -1,7 +1,8 @@
 use aoc2023::{run_problem, Problem};
-use itertools::Itertools;
+use itertools::{sorted, Itertools};
+use ring_algorithm::chinese_remainder_theorem;
 use std::{
-    collections::{BinaryHeap, HashMap, HashSet},
+    collections::{HashMap, HashSet},
     fmt::Display,
 };
 
@@ -27,7 +28,7 @@ struct Module {
 struct System {
     on_push: Vec<String>,
     modules: HashMap<String, Module>,
-    presses: HashMap<String, Option<usize>>,
+    presses: HashMap<String, HashSet<usize>>,
     num_presses: usize,
     low_pulses: usize,
     high_pulses: usize,
@@ -42,6 +43,13 @@ impl System {
         match pulse {
             Pulse::Low => self.low_pulses += 1,
             Pulse::High => self.high_pulses += 1,
+        }
+
+        if cur == "dg" && pulse == Pulse::High {
+            self.presses
+                .entry(from.to_string())
+                .or_default()
+                .insert(self.num_presses);
         }
 
         if !self.modules.contains_key(cur) {
@@ -73,9 +81,7 @@ impl System {
         };
 
         if let Some(pulse) = pulse {
-            if pulse == Pulse::High {
-                self.presses.insert(cur.to_string(), Some(self.num_presses));
-            }
+            if pulse == Pulse::High {}
             for name in cur_module.outputs.clone() {
                 self.propagate(&name, cur, pulse.clone());
             }
@@ -97,47 +103,54 @@ impl Problem for Problem20 {
         F1: FnOnce(&dyn Display) -> (),
         F2: FnOnce(&dyn Display) -> (),
     {
-        let mut high_pulses = 0;
-        let mut low_pulses = 0;
-
         let mut first_system = self.system.clone();
 
-        for _ in 0..1000 {
-            first_system.push_button();
-        }
+        (0..1000).for_each(|_| first_system.push_button());
         report_first(&(first_system.low_pulses * first_system.high_pulses));
 
         let mut second_system = self.system.clone();
-        let targets = vec!["lk", "zv", "sp", "xt"];
-        let mut periods = HashMap::new();
 
-        let mut last_press = HashMap::new();
+        let targets = self
+            .system
+            .modules
+            .iter()
+            .filter(|(_, module)| module.outputs.contains(&"rx".into()))
+            .map(|t| t.0)
+            .map(|tg| {
+                self.system
+                    .modules
+                    .iter()
+                    .filter(|(_, module)| module.outputs.contains(tg))
+                    .map(|t| t.0)
+                    .collect_vec()
+            })
+            .nth(0)
+            .unwrap();
 
-        while !targets.iter().all(|target| periods.contains_key(*target)) {
+        while !targets.iter().all(|target| {
+            second_system
+                .presses
+                .get(*target)
+                .map(|s| s.len())
+                .unwrap_or(0)
+                > 1
+        }) {
             second_system.push_button();
-            for t in &targets {
-                let val = second_system.presses.get(*t).and_then(|val| *val);
-
-                if val.is_some() {
-                    if last_press.contains_key(*t) {
-                        let pd = val.unwrap() - last_press.get(*t).unwrap();
-                        if pd != 0 {
-                            periods.insert(t.to_string(), pd);
-                        }
-                    }
-
-                    last_press.insert(t.to_string(), val.unwrap());
-                }
-            }
         }
 
-        println!("{periods:?}");
+        let (residues, moduli): (Vec<_>, Vec<_>) = targets
+            .iter()
+            .map(|t| {
+                let (f, s) = sorted(second_system.presses.get(*t).unwrap().iter())
+                    .collect_tuple()
+                    .unwrap();
 
-        let mut cycle = 1;
-        for (_, v) in periods {
-            cycle = num::integer::lcm(cycle, v);
-        }
-        report_second(&cycle);
+                (*f as i64, (s - f) as i64)
+            })
+            .unzip();
+
+        let a = chinese_remainder_theorem(&residues, &moduli).unwrap();
+        println!("{a:?}")
     }
 
     fn parse(lines: Vec<String>) -> Self {
