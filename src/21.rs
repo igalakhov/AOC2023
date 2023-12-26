@@ -1,7 +1,7 @@
 use aoc2023::{run_problem, Problem};
 use itertools::Itertools;
 use std::{
-    collections::{BinaryHeap, HashSet, VecDeque},
+    collections::{HashSet, VecDeque},
     fmt::Display,
 };
 
@@ -57,9 +57,6 @@ impl Problem for Problem21 {
         );
 
         // credit: https://github.com/villuna/aoc23/wiki/A-Geometric-solution-to-advent-of-code-2023,-day-2
-
-        println!("{}", distances.len());
-
         let even_corners = distances
             .iter()
             .filter(|v| **v % 2 == 0 && **v > 65)
@@ -69,15 +66,13 @@ impl Problem for Problem21 {
             .filter(|v| **v % 2 == 1 && **v > 65)
             .count();
 
-        println!("{even_corners} {odd_corners}");
-
         let even_full = distances.iter().filter(|v| **v % 2 == 0).count();
         let odd_full = distances.iter().filter(|v| **v % 2 == 1).count();
         let n = 202300;
 
         report_second(
-            &(((n + 1) * (n * 1)) * odd_full + (n * n) * even_full - (n + 1) * odd_corners
-                + n * even_corners),
+            &(((n + 1) * (n + 1)) * odd_full + (n * n) * even_full + n * even_corners
+                - (n + 1) * odd_corners),
         );
     }
 
