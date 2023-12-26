@@ -63,7 +63,7 @@ fn shortest_path(grid: &Vec<Vec<i32>>, min_move: usize, max_move: usize) -> i32 
 
     heap.push((0, (0, 0), Dir::Right));
 
-    while heap.len() > 0 {
+    while !heap.is_empty() {
         let (c, loc, dir) = heap.pop().unwrap();
         if visited.contains(&(loc, dir)) {
             continue;
@@ -75,7 +75,7 @@ fn shortest_path(grid: &Vec<Vec<i32>>, min_move: usize, max_move: usize) -> i32 
             return -c;
         }
 
-        for (nloc, ndir, cost) in adj(&grid, loc, dir, min_move, max_move) {
+        for (nloc, ndir, cost) in adj(grid, loc, dir, min_move, max_move) {
             heap.push((c - cost, nloc, ndir));
         }
     }
@@ -83,10 +83,10 @@ fn shortest_path(grid: &Vec<Vec<i32>>, min_move: usize, max_move: usize) -> i32 
 }
 
 impl Problem for Problem17 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(&shortest_path(&self.grid, 1, 3));
         report_second(&shortest_path(&self.grid, 4, 10));

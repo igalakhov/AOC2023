@@ -34,7 +34,7 @@ fn map_interval_over_ranges(ranges: Vec<Range>, l: i64, r: i64) -> Vec<(i64, i64
         return vec![];
     }
 
-    if ranges.len() == 0 {
+    if ranges.is_empty() {
         return vec![(l, r)];
     }
 
@@ -73,8 +73,8 @@ struct Problem5 {
 impl Problem for Problem5 {
     fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         let mut cur = self.seeds.clone();
 
@@ -106,7 +106,7 @@ impl Problem for Problem5 {
             .split(": ")
             .nth(1)
             .unwrap()
-            .split(" ")
+            .split(' ')
             .map(|n| n.parse::<i64>().unwrap())
             .collect::<Vec<_>>();
 
@@ -117,7 +117,7 @@ impl Problem for Problem5 {
 
         while i < num_lines {
             let mut j = i + 1;
-            while j < num_lines && lines[j].len() != 0 {
+            while j < num_lines && !lines[j].is_empty() {
                 j += 1;
             }
 
@@ -125,7 +125,7 @@ impl Problem for Problem5 {
                 .iter()
                 .map(|s| {
                     let md = s
-                        .split(" ")
+                        .split(' ')
                         .map(|n| n.parse::<i64>().unwrap())
                         .collect::<Vec<_>>();
 

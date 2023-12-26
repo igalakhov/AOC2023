@@ -21,8 +21,8 @@ fn num_solutions(t: f64, d: f64) -> i64 {
 impl Problem for Problem6 {
     fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(
             &self
@@ -37,7 +37,7 @@ impl Problem for Problem6 {
 
     fn parse(lines: Vec<String>) -> Self {
         let parse_ints = |line: &String| {
-            line.split(":")
+            line.split(':')
                 .nth(1)
                 .unwrap()
                 .to_string()
@@ -45,7 +45,7 @@ impl Problem for Problem6 {
                 .replace("  ", " ")
                 .replace("  ", " ")
                 .replace("  ", " ")
-                .split(" ")
+                .split(' ')
                 .map(|s| s.parse::<f64>().unwrap())
                 .collect::<Vec<_>>()
         };
@@ -57,21 +57,19 @@ impl Problem for Problem6 {
                 .collect(),
             concat_races: (
                 lines[0]
-                    .split(":")
+                    .split(':')
                     .nth(1)
                     .unwrap()
                     .trim()
-                    .replace(" ", "")
-                    .replace(" ", "")
+                    .replace([' ', ' '], "")
                     .parse::<f64>()
                     .unwrap(),
                 lines[1]
-                    .split(":")
+                    .split(':')
                     .nth(1)
                     .unwrap()
                     .trim()
-                    .replace(" ", "")
-                    .replace(" ", "")
+                    .replace([' ', ' '], "")
                     .parse::<f64>()
                     .unwrap(),
             ),

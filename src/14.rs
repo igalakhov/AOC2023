@@ -32,10 +32,9 @@ fn cycle(mut grid: Vec<Vec<char>>) -> Vec<Vec<char>> {
 
         grid = (0..grid[0].len())
             .map(|j| {
-                let ret = (0..grid.len())
+                (0..grid.len())
                     .map(|i| grid[grid.len() - i - 1][j])
-                    .collect();
-                ret
+                    .collect()
             })
             .collect();
     }
@@ -44,10 +43,10 @@ fn cycle(mut grid: Vec<Vec<char>>) -> Vec<Vec<char>> {
 }
 
 impl Problem for Problem14 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(
             &tilt_up(self.grid.clone())
@@ -80,7 +79,7 @@ impl Problem for Problem14 {
                     .iter()
                     .enumerate()
                     .map(|(idx, row)| {
-                        (self.grid.len() - idx) * row.into_iter().filter(|c| c == &&'O').count()
+                        (self.grid.len() - idx) * row.iter().filter(|c| c == &&'O').count()
                     })
                     .sum::<usize>();
 

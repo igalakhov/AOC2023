@@ -2,8 +2,10 @@ use aoc2023::{run_problem, Problem};
 use itertools::Itertools;
 use std::fmt::Display;
 
+type Point3D = (f64, f64, f64);
+
 struct Problem24 {
-    stones: Vec<((f64, f64, f64), (f64, f64, f64))>,
+    stones: Vec<(Point3D, Point3D)>,
 }
 
 fn intersect_2d(
@@ -23,11 +25,11 @@ fn intersect_2d(
     let t1 = (x - x1) / vx1;
     let t2 = (x - x2) / vx2;
 
-    return if t1 >= 0.0 && t2 >= 0.0 {
+    if t1 >= 0.0 && t2 >= 0.0 {
         Some((x, y))
     } else {
         None
-    };
+    }
 }
 
 fn determinant(matrix: Vec<Vec<f64>>) -> f64 {
@@ -38,16 +40,16 @@ fn determinant(matrix: Vec<Vec<f64>>) -> f64 {
     let mut ret = 0.0;
 
     for j in 0..matrix.len() {
-        let subdet = matrix[0][j].clone()
+        let subdet = matrix[0][j]
             * determinant(
                 matrix[1..]
-                    .into_iter()
+                    .iter()
                     .map(|v| {
                         v.clone()
                             .iter()
                             .enumerate()
                             .filter(|(idx, _)| idx != &j)
-                            .map(|t| t.1.clone())
+                            .map(|t| *t.1)
                             .collect_vec()
                     })
                     .collect_vec(),
@@ -101,10 +103,10 @@ fn solve_cramer(m: Vec<Vec<f64>>, b: Vec<f64>) -> Vec<f64> {
 }
 
 impl Problem for Problem24 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(
             &(0..self.stones.len())
@@ -112,7 +114,7 @@ impl Problem for Problem24 {
                 .filter(|(i, j)| {
                     const MI: f64 = 200000000000000.0;
                     const MA: f64 = 400000000000000.0;
-                    intersect_2d(self.stones[*i].into(), self.stones[*j].into())
+                    intersect_2d(self.stones[*i], self.stones[*j])
                         .map_or_else(|| false, |(x, y)| x >= MI && y >= MI && x <= MA && y <= MA)
                 })
                 .count(),
@@ -132,8 +134,8 @@ impl Problem for Problem24 {
                 .map(|line| {
                     let (pos, vel) = line.split(" @ ").collect_tuple().unwrap();
                     let parse = |p: &str| {
-                        p.replace(" ", "")
-                            .split(",")
+                        p.replace(' ', "")
+                            .split(',')
                             .map(|x| x.parse::<f64>().unwrap())
                             .collect_tuple()
                             .unwrap()

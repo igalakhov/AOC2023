@@ -17,10 +17,10 @@ struct Problem22 {
 
 fn parse_block(block: String) -> Vec<(usize, usize, usize)> {
     let ((x1, y1, z1), (x2, y2, z2)) = block
-        .split("~")
+        .split('~')
         .map(|cords| {
             cords
-                .split(",")
+                .split(',')
                 .map(|cord| cord.parse::<usize>().unwrap())
                 .collect_tuple()
                 .unwrap()
@@ -37,7 +37,7 @@ fn parse_block(block: String) -> Vec<(usize, usize, usize)> {
 
 fn fits(
     collection: &BlockCollection,
-    points: &Vec<(usize, usize, usize)>,
+    points: &[(usize, usize, usize)],
     ignore_name: usize,
 ) -> bool {
     points.iter().all(|point| {
@@ -74,7 +74,7 @@ fn drop_block(collection: &mut BlockCollection, name: usize) {
         .map(|(x, y, z)| (x, y, z - 1))
         .collect_vec();
     for pt in new_points.clone() {
-        collection.points.insert(pt.clone(), name);
+        collection.points.insert(pt, name);
     }
     collection.blocks.insert(name, new_points);
 }
@@ -95,10 +95,10 @@ fn remove_block(collection: BlockCollection, name: usize) -> BlockCollection {
 }
 
 impl Problem for Problem22 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         let mut collection = self.collection.clone();
 

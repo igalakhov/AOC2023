@@ -21,8 +21,8 @@ enum Dir {
     Right,
 }
 
-fn parse_line(value: &String) -> (Instruction, Instruction) {
-    let (dir, len, col) = value.split(" ").collect_tuple().unwrap();
+fn parse_line(value: &str) -> (Instruction, Instruction) {
+    let (dir, len, col) = value.split(' ').collect_tuple().unwrap();
 
     (
         Instruction {
@@ -81,10 +81,10 @@ fn get_area(instructions: &Vec<Instruction>) -> isize {
 }
 
 impl Problem for Problem18 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(&get_area(&self.short_instructions));
         report_second(&get_area(&self.long_instructions));

@@ -4,18 +4,17 @@ use std::fs::read_to_string;
 pub trait Problem {
     fn parse(lines: Vec<String>) -> Self;
 
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> ();
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display);
 }
 
 pub fn run_problem<T: Problem>(filename: &str) {
     let lines: Vec<String> = read_to_string(filename)
         .unwrap()
         .lines()
-        .into_iter()
-        .map(|x| String::from(x))
+        .map(String::from)
         .collect();
 
     let problem = T::parse(lines);

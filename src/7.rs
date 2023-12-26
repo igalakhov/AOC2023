@@ -18,16 +18,16 @@ enum HandKind {
     HighCard,
 }
 
-impl Into<i64> for HandKind {
-    fn into(self) -> i64 {
-        match self {
-            Self::FiveOfAKind => 6,
-            Self::FourOfAKind => 5,
-            Self::FullHouse => 4,
-            Self::ThreeOfAKind => 3,
-            Self::TwoPair => 2,
-            Self::OnePair => 1,
-            Self::HighCard => 0,
+impl From<HandKind> for i64 {
+    fn from(val: HandKind) -> Self {
+        match val {
+            HandKind::FiveOfAKind => 6,
+            HandKind::FourOfAKind => 5,
+            HandKind::FullHouse => 4,
+            HandKind::ThreeOfAKind => 3,
+            HandKind::TwoPair => 2,
+            HandKind::OnePair => 1,
+            HandKind::HighCard => 0,
         }
     }
 }
@@ -150,8 +150,8 @@ fn with_wildcards(str: &str) -> Hand {
     Hand { kind, cards }
 }
 
-fn solve_problem(hands: &Vec<(Hand, i64)>) -> i64 {
-    let mut hands = hands.clone();
+fn solve_problem(hands: &[(Hand, i64)]) -> i64 {
+    let mut hands = hands.to_owned();
     hands.sort_by_key(|(hand, _)| (Into::<i64>::into(hand.kind.clone()), hand.cards));
 
     hands
@@ -164,8 +164,8 @@ fn solve_problem(hands: &Vec<(Hand, i64)>) -> i64 {
 impl Problem for Problem7 {
     fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(&solve_problem(&self.hands_no_wildcards));
         report_second(&solve_problem(&self.hands_with_wildcards));
@@ -176,7 +176,7 @@ impl Problem for Problem7 {
             hands_no_wildcards: lines
                 .iter()
                 .map(|line| {
-                    let parts = line.split(" ").collect::<Vec<_>>();
+                    let parts = line.split(' ').collect::<Vec<_>>();
 
                     (no_wildcards(parts[0]), parts[1].parse::<i64>().unwrap())
                 })
@@ -184,7 +184,7 @@ impl Problem for Problem7 {
             hands_with_wildcards: lines
                 .iter()
                 .map(|line| {
-                    let parts = line.split(" ").collect::<Vec<_>>();
+                    let parts = line.split(' ').collect::<Vec<_>>();
 
                     (with_wildcards(parts[0]), parts[1].parse::<i64>().unwrap())
                 })

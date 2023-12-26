@@ -6,8 +6,8 @@ struct Problem9 {
     sequences: Vec<Vec<i64>>,
 }
 
-fn get_seqs(init: &Vec<i64>) -> Vec<Vec<i64>> {
-    let mut seqs = vec![init.clone()];
+fn get_seqs(init: &[i64]) -> Vec<Vec<i64>> {
+    let mut seqs = vec![init.to_owned()];
 
     while !seqs.last().unwrap().iter().all(|x| x == &0) {
         seqs.push(
@@ -24,11 +24,11 @@ fn get_seqs(init: &Vec<i64>) -> Vec<Vec<i64>> {
     seqs
 }
 
-fn predict_next(seq: &Vec<i64>) -> i64 {
+fn predict_next(seq: &[i64]) -> i64 {
     get_seqs(seq).iter().map(|s| s.last().unwrap()).sum::<i64>()
 }
 
-fn predict_prev(seq: &Vec<i64>) -> i64 {
+fn predict_prev(seq: &[i64]) -> i64 {
     get_seqs(seq)
         .into_iter()
         .map(|s| *s.first().unwrap())
@@ -40,31 +40,19 @@ fn predict_prev(seq: &Vec<i64>) -> i64 {
 impl Problem for Problem9 {
     fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
-        report_first(
-            &self
-                .sequences
-                .iter()
-                .map(|seq| predict_next(seq))
-                .sum::<i64>(),
-        );
+        report_first(&self.sequences.iter().map(|v| predict_next(v)).sum::<i64>());
 
-        report_second(
-            &self
-                .sequences
-                .iter()
-                .map(|seq| predict_prev(seq))
-                .sum::<i64>(),
-        );
+        report_second(&self.sequences.iter().map(|v| predict_prev(v)).sum::<i64>());
     }
 
     fn parse(lines: Vec<String>) -> Self {
         Self {
             sequences: lines
                 .into_iter()
-                .map(|line| line.split(" ").map(|s| s.parse::<i64>().unwrap()).collect())
+                .map(|line| line.split(' ').map(|s| s.parse::<i64>().unwrap()).collect())
                 .collect(),
         }
     }

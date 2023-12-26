@@ -14,8 +14,8 @@ impl Problem for Problem1 {
 
     fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(
             &(self
@@ -24,7 +24,7 @@ impl Problem for Problem1 {
                 .map(|x: &String| {
                     x.clone()
                         .chars()
-                        .filter(|c| c.is_digit(10))
+                        .filter(|c| c.is_ascii_digit())
                         .collect::<Vec<char>>()
                 })
                 .map(|v: Vec<char>| {
@@ -48,12 +48,11 @@ impl Problem for Problem1 {
                     .zip(1..10)
                     .map(|(i, n)| (i.to_string(), n))
                     .chain((1..10).map(|i| (format!("{}", i), i)))
-                    .map(|(word, value)| {
+                    .flat_map(|(word, value)| {
                         line.match_indices(word.as_str())
-                            .map(move |(idx, _)| (idx, value.clone()))
+                            .map(move |(idx, _)| (idx, value))
                             .collect::<Vec<_>>()
                     })
-                    .flatten()
                     .minmax_by_key(|(idx, _)| *idx)
                     {
                         MinMaxResult::OneElement((_, d)) => 11 * d,

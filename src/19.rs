@@ -33,18 +33,18 @@ fn parse_step(s: &str) -> Step {
         };
     }
 
-    let (cmp, jump_to) = s.split(":").collect_tuple().unwrap();
+    let (cmp, jump_to) = s.split(':').collect_tuple().unwrap();
 
     let mut kind = None;
 
-    if cmp.contains("<") {
-        let (name, val) = cmp.split("<").collect_tuple().unwrap();
+    if cmp.contains('<') {
+        let (name, val) = cmp.split('<').collect_tuple().unwrap();
 
         kind = Some(StepKind::LessThan(name.to_string(), val.parse().unwrap()))
     }
 
-    if s.contains(">") {
-        let (name, val) = cmp.split(">").collect_tuple().unwrap();
+    if s.contains('>') {
+        let (name, val) = cmp.split('>').collect_tuple().unwrap();
 
         kind = Some(StepKind::GreaterThan(
             name.to_string(),
@@ -60,9 +60,9 @@ fn parse_step(s: &str) -> Step {
 
 fn parse_item(s: String) -> HashMap<String, i64> {
     s[1..s.len() - 1]
-        .split(",")
+        .split(',')
         .map(|v| {
-            let (name, val) = v.split("=").collect_tuple().unwrap();
+            let (name, val) = v.split('=').collect_tuple().unwrap();
 
             (name.to_string(), val.parse().unwrap())
         })
@@ -70,10 +70,10 @@ fn parse_item(s: String) -> HashMap<String, i64> {
 }
 
 fn parse_workflow(s: String) -> (String, Workflow) {
-    let (name, steps) = s.split("{").collect_tuple().unwrap();
+    let (name, steps) = s.split('{').collect_tuple().unwrap();
     let steps = steps[..steps.len() - 1]
         .to_string()
-        .split(",")
+        .split(',')
         .map(parse_step)
         .collect();
 
@@ -145,16 +145,16 @@ impl Problem19 {
 }
 
 impl Problem for Problem19 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(
             &self
                 .items
                 .iter()
-                .filter(|item| self.run_item(*item, "in"))
+                .filter(|item| self.run_item(item, "in"))
                 .map(|item| item.iter().map(|(_, v)| v).sum::<i64>())
                 .sum::<i64>(),
         );
@@ -187,7 +187,7 @@ impl Problem for Problem19 {
         let mut items = vec![];
         let mut is_part = false;
         for line in lines {
-            if line.len() == 0 {
+            if line.is_empty() {
                 is_part = true;
                 continue;
             }

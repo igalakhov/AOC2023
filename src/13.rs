@@ -8,20 +8,20 @@ struct Problem13 {
 fn part_one_contribution(grid: &Vec<Vec<char>>, ignore: usize) -> usize {
     for j in 1..grid[0].len() {
         let to_check = j.min(grid[0].len() - j);
-        if (0..to_check).all(|o| (0..grid.len()).all(|i| grid[i][j - o - 1] == grid[i][j + o])) {
-            if j != ignore {
-                return j;
-            }
+        if (0..to_check).all(|o| (0..grid.len()).all(|i| grid[i][j - o - 1] == grid[i][j + o]))
+            && j != ignore
+        {
+            return j;
         }
     }
 
     for i in 1..grid.len() {
         let to_check = i.min(grid.len() - i);
 
-        if (0..to_check).all(|o| (0..grid[0].len()).all(|j| grid[i - o - 1][j] == grid[i + o][j])) {
-            if 100 * i != ignore {
-                return 100 * i;
-            }
+        if (0..to_check).all(|o| (0..grid[0].len()).all(|j| grid[i - o - 1][j] == grid[i + o][j]))
+            && 100 * i != ignore
+        {
+            return 100 * i;
         }
     }
 
@@ -29,10 +29,10 @@ fn part_one_contribution(grid: &Vec<Vec<char>>, ignore: usize) -> usize {
 }
 
 impl Problem for Problem13 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(
             &self
@@ -77,7 +77,7 @@ impl Problem for Problem13 {
         let mut cur_grid = vec![];
 
         for line in lines {
-            if line.len() == 0 {
+            if line.is_empty() {
                 grids.push(cur_grid);
                 cur_grid = vec![];
             } else {

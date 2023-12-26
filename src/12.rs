@@ -58,10 +58,10 @@ fn solve_case(pat: &String, sizes: &Vec<usize>) -> usize {
 }
 
 impl Problem for Problem12 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(
             &self
@@ -97,10 +97,10 @@ impl Problem for Problem12 {
             pats: lines
                 .into_iter()
                 .map(|line| {
-                    let (pat, nums) = line.split(" ").collect_tuple().unwrap();
+                    let (pat, nums) = line.split(' ').collect_tuple().unwrap();
                     (
                         pat.to_string(),
-                        nums.split(",")
+                        nums.split(',')
                             .map(|s| s.parse::<usize>().unwrap())
                             .collect(),
                     )

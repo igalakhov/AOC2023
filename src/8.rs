@@ -21,8 +21,8 @@ fn lcm(mut m: i64, mut n: i64) -> i64 {
 impl Problem for Problem8 {
     fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         {
             let mut steps = 0;
@@ -42,7 +42,7 @@ impl Problem for Problem8 {
         {
             let mut part2 = 1;
 
-            for (start, _) in &self.graph {
+            for start in self.graph.keys() {
                 if start.as_bytes()[2] != b'A' {
                     continue;
                 }
@@ -73,7 +73,7 @@ impl Problem for Problem8 {
         Self {
             path: lines[0].clone(),
             graph: lines[2..]
-                .into_iter()
+                .iter()
                 .map(|m| re.captures(m).unwrap().extract())
                 .map(|(_, [name, left, right])| {
                     (name.to_string(), (left.to_string(), right.to_string()))

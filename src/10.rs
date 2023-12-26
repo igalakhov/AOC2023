@@ -39,7 +39,7 @@ fn get_furthest_point_and_loop(
     start_pos: &(usize, usize),
     grid: &Vec<Vec<char>>,
 ) -> (i64, Vec<(usize, usize)>) {
-    let (mut ci, mut cj) = get_endpoints(start_pos, grid).iter().nth(0).unwrap();
+    let (mut ci, mut cj) = get_endpoints(start_pos, grid).first().unwrap();
 
     let mut path_len = 0;
     let mut visited = HashSet::new();
@@ -50,8 +50,7 @@ fn get_furthest_point_and_loop(
         if let Some((ni, nj)) = vec![(-1, 0), (1, 0), (0, 1), (0, -1)]
             .into_iter()
             .map(|(di, dj)| (ci.wrapping_add_signed(di), cj.wrapping_add_signed(dj)))
-            .filter(|(i, j)| grid[*i][*j] == 'X' && !visited.contains(&(*i, *j)))
-            .nth(0)
+            .find(|(i, j)| grid[*i][*j] == 'X' && !visited.contains(&(*i, *j)))
         {
             (ci, cj) = (ni, nj);
         } else {
@@ -73,7 +72,7 @@ fn get_contained_points(
     let grid_height = grid.len();
     let grid_width = grid[0].len();
     let mut loop_points_set = HashSet::new();
-    loop_points_set.extend(loop_points.into_iter());
+    loop_points_set.extend(loop_points);
     for (i, j) in (0..grid_height).cartesian_product(0..grid_width) {
         if !loop_points_set.contains(&(i, j)) {
             grid[i][j] = '.';
@@ -93,8 +92,7 @@ fn get_contained_points(
     {
         visited.clear();
         let mut queue = vec![(si, sj)];
-        while queue.len() > 0 {
-            let (ci, cj) = queue.pop().unwrap();
+        while let Some((ci, cj)) = queue.pop() {
             if !(0..grid.len()).contains(&ci)
                 || !(0..grid[0].len()).contains(&cj)
                 || grid[ci][cj] == 'X'
@@ -121,10 +119,10 @@ fn get_contained_points(
 }
 
 impl Problem for Problem10 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         let (part_1, loop_points) = get_furthest_point_and_loop(&self.start_pos, &self.grid);
         report_first(&part_1);

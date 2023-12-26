@@ -1,7 +1,8 @@
 use aoc2023::{run_problem, Problem};
-use itertools::Itertools;
+use itertools::{sorted, Itertools};
+use ring_algorithm::chinese_remainder_theorem;
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::{HashMap, HashSet, VecDeque},
     fmt::Display,
 };
 
@@ -27,7 +28,7 @@ struct Module {
 struct System {
     on_push: Vec<String>,
     modules: HashMap<String, Module>,
-    presses: HashMap<String, usize>,
+    presses: HashMap<String, HashSet<usize>>,
     num_presses: usize,
     low_pulses: usize,
     high_pulses: usize,
@@ -41,24 +42,28 @@ impl System {
     fn push_button(&mut self) {
         self.num_presses += 1;
         self.low_pulses += 1;
-        let mut to_process = VecDeque::new();
-
-        self.on_push.iter().for_each(|pushed| {
-            to_process.push_front((pushed.to_string(), "broadcaster".to_string(), Pulse::Low))
-        });
+        let mut to_process = VecDeque::from_iter(
+            self.on_push
+                .iter()
+                .map(|pushed| (pushed.to_string(), "broadcaster".to_string(), Pulse::Low)),
+        );
 
         while let Some((cur, from, pulse)) = to_process.pop_back() {
+            println!("{from} -{pulse:?}-> {cur}");
             match pulse {
                 Pulse::Low => self.low_pulses += 1,
-                Pulse::High => {
-                    self.presses.insert(from.to_string(), self.num_presses);
+                Pulse::High => self.high_pulses += 1,
+            }
 
-                    self.high_pulses += 1
-                }
+            if cur == "dg" && pulse == Pulse::High {
+                self.presses
+                    .entry(from.to_string())
+                    .or_default()
+                    .insert(self.num_presses);
             }
 
             if !self.modules.contains_key(&cur) {
-                continue;
+                return;
             }
 
             let cur_module = self.modules.get_mut(&cur).unwrap();
@@ -86,71 +91,82 @@ impl System {
                 _ => None,
             };
 
-            pulse.into_iter().for_each(|pulse| {
+            if let Some(pulse) = pulse {
                 cur_module
                     .outputs
                     .clone()
                     .into_iter()
                     .for_each(|name| to_process.push_front((name, cur.clone(), pulse.clone())))
-            });
+            }
         }
     }
 }
 
-fn lcm(mut m: usize, mut n: usize) -> usize {
-    let p = m * n;
+fn gcd(mut m: i64, mut n: i64) -> i64 {
     while m != 0 {
         if m < n {
             std::mem::swap(&mut m, &mut n);
         }
         m %= n;
     }
-    p / n
+    n
 }
 
 impl Problem for Problem20 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
     where
-        F1: FnOnce(&dyn Display),
-        F2: FnOnce(&dyn Display),
+        F1: FnOnce(&dyn Display) -> (),
+        F2: FnOnce(&dyn Display) -> (),
     {
         let mut first_system = self.system.clone();
 
-        (0..1000).for_each(|_| first_system.push_button());
+        (0..1).for_each(|_| first_system.push_button());
         report_first(&(first_system.low_pulses * first_system.high_pulses));
 
-        let mut second_system = self.system.clone();
-
-        let targets = self
-            .system
-            .modules
-            .iter()
-            .filter(|(_, module)| module.outputs.contains(&"rx".into()))
-            .map(|t| t.0)
-            .map(|tg| {
-                self.system
-                    .modules
-                    .iter()
-                    .filter(|(_, module)| module.outputs.contains(tg))
-                    .map(|t| t.0)
-                    .collect_vec()
-            })
-            .nth(0)
-            .unwrap();
-
-        while !targets
-            .iter()
-            .all(|target| second_system.presses.contains_key(*target))
-        {
-            second_system.push_button();
-        }
-
-        report_second(
-            &targets
-                .into_iter()
-                .map(|t| *second_system.presses.get(t).unwrap())
-                .fold(1, lcm),
-        );
+        // let mut second_system = self.system.clone();
+        //
+        // let targets = self
+        //     .system
+        //     .modules
+        //     .iter()
+        //     .filter(|(_, module)| module.outputs.contains(&"rx".into()))
+        //     .map(|t| t.0)
+        //     .map(|tg| {
+        //         self.system
+        //             .modules
+        //             .iter()
+        //             .filter(|(_, module)| module.outputs.contains(tg))
+        //             .map(|t| t.0)
+        //             .collect_vec()
+        //     })
+        //     .nth(0)
+        //     .unwrap();
+        //
+        // while !targets.iter().all(|target| {
+        //     second_system
+        //         .presses
+        //         .get(*target)
+        //         .map(|s| s.len())
+        //         .unwrap_or(0)
+        //         > 30
+        // }) {
+        //     second_system.push_button();
+        // }
+        //
+        // targets.into_iter().for_each(|t| {
+        //     let presses = second_system.presses.get(t).unwrap();
+        //
+        //     println!(
+        //         "{:?} {}",
+        //         sorted(presses.iter()).collect_vec(),
+        //         presses.len()
+        //     );
+        //
+        //     println!(
+        //         "{}",
+        //         *presses.iter().max().unwrap() as f64 / (presses.len() as f64)
+        //     );
+        // });
     }
 
     fn parse(lines: Vec<String>) -> Self {
@@ -191,8 +207,11 @@ impl Problem for Problem20 {
             if !modules.contains_key(&to) {
                 continue;
             }
-            if let ModuleKind::Conjunction(inputs) = &mut modules.get_mut(&to).unwrap().kind {
-                inputs.insert(from, Pulse::Low);
+            match &mut modules.get_mut(&to).unwrap().kind {
+                ModuleKind::Conjunction(inputs) => {
+                    inputs.insert(from, Pulse::Low);
+                }
+                _ => (),
             }
         }
 

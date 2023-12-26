@@ -11,7 +11,7 @@ struct Problem23 {
 fn fill(
     grid: &Vec<Vec<char>>,
     (i, j): (usize, usize),
-    regions: &mut Vec<Vec<i32>>,
+    regions: &mut [Vec<i32>],
     name: i32,
 ) -> HashSet<(usize, usize)> {
     let mut q = vec![(i, j)];
@@ -58,7 +58,7 @@ fn longest_path_brute_force(
         lens: &mut Vec<usize>,
         areas: &HashMap<i32, usize>,
         mut len: usize,
-    ) -> () {
+    ) {
         if visited.contains(&cur) {
             return;
         }
@@ -82,10 +82,10 @@ fn longest_path_brute_force(
 }
 
 impl Problem for Problem23 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         let mut regions = vec![vec![-1; self.grid[0].len()]; self.grid.len()];
         let mut tiles = HashMap::new();

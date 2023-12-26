@@ -8,8 +8,8 @@ struct Problem4 {
 impl Problem for Problem4 {
     fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         let card_scores: Vec<_> = self
             .cards
@@ -54,7 +54,7 @@ impl Problem for Problem4 {
                         .map(|s| {
                             s.trim()
                                 .replace("  ", " ")
-                                .split(" ")
+                                .split(' ')
                                 .map(|c| c.parse::<i64>().unwrap())
                                 .collect::<Vec<_>>()
                                 .into_iter()

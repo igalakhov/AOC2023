@@ -34,10 +34,10 @@ fn solve_with_expansion_factor(grid: &Vec<Vec<char>>, factor: usize) -> usize {
 }
 
 impl Problem for Problem11 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(&solve_with_expansion_factor(&self.grid, 2));
         report_second(&solve_with_expansion_factor(&self.grid, 1000000));

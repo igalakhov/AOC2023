@@ -72,10 +72,10 @@ struct Problem16 {
 }
 
 impl Problem for Problem16 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         report_first(&visited_from_start(&self.grid, (0, 0), Dir::Right));
 

@@ -9,8 +9,8 @@ struct Problem3 {
 impl Problem for Problem3 {
     fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         let mut first_answer = 0;
         let mut gear_mapping: Vec<((i32, i32), i32)> = vec![];
@@ -47,7 +47,7 @@ impl Problem for Problem3 {
                     })
                     .collect::<Vec<_>>();
 
-                if gears.len() > 0 {
+                if !gears.is_empty() {
                     first_answer += number;
                 }
 

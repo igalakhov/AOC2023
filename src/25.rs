@@ -13,10 +13,10 @@ struct Problem25 {
 }
 
 impl Problem for Problem25 {
-    fn solve<F1, F2>(&self, report_first: F1, report_second: F2) -> ()
+    fn solve<F1, F2>(&self, report_first: F1, report_second: F2)
     where
-        F1: FnOnce(&dyn Display) -> (),
-        F2: FnOnce(&dyn Display) -> (),
+        F1: FnOnce(&dyn Display),
+        F2: FnOnce(&dyn Display),
     {
         let mut graph: UnGraph<(), ()> = UnGraph::new_undirected();
         let vertices = (0..self.size).map(|_| graph.add_node(())).collect_vec();
@@ -28,9 +28,9 @@ impl Problem for Problem25 {
 
         let min_cut: Result<Option<(usize, Vec<_>)>> = stoer_wagner_min_cut(&graph, |_| Ok(1));
 
-        report_first(&(|s: usize| (s * (self.size - s)))(
-            min_cut.unwrap().unwrap().1.len(),
-        ));
+        let s = min_cut.unwrap().unwrap().1.len();
+
+        report_first(&(s * (self.size - s)));
 
         report_second(&"All done!");
     }
@@ -42,7 +42,7 @@ impl Problem for Problem25 {
                 let (from, to_adj) = line.split(": ").collect_tuple().unwrap();
 
                 to_adj
-                    .split(" ")
+                    .split(' ')
                     .map(|to| (from.to_string(), to.to_string()))
                     .collect_vec()
             })
